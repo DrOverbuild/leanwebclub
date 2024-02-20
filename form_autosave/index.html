@@ -69,30 +69,58 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const address = document.getElementById("address");
-    const name = document.getElementById("name");
-    const email = document.getElementById("email");
-    const more = document.getElementById("more");
+    const form = document.getElementById('save-me');
 
-    address.value = localStorage.getItem('address');
-    name.value = localStorage.getItem("name");
-    email.value = localStorage.getItem("email");
-    more.value = localStorage.getItem("more");
+    const json = localStorage.getItem('autosave_data');
+    let savedForm;
+    if (json) {
+      try {
+        savedForm = JSON.parse(json);
+      } catch (e) {}
+    }
 
-    const saveMe = document.getElementById('save-me');
-    saveMe.addEventListener('input', function (e) {
-      localStorage.setItem(e.target.name, e.target.value);
+    if (savedForm) {
+      for (const formItem of form.elements) {
+        if (!savedForm[formItem.name]) continue;
+        formItem.value = savedForm[formItem.name];
+      }
+    }
+
+    form.addEventListener('input', function () {
+      const serialised = serialize(new FormData(form));
+      localStorage.setItem('autosave_data', JSON.stringify(serialised));
     });
 
-    saveMe.addEventListener('submit', function (e) {
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
-      address.value = "";
-      name.value = "";
-      email.value = "";
-      more.value = "";
+      for (const formItem of form.elements) {
+        formItem.value = '';
+      }
+
       localStorage.clear();
     });
   });
+
+  /**
+   * Serialize all form data into an object
+   * (c) Chris Ferdinandi, MIT License, https://gomakethings.com
+   * @param  {FormData} data The FormData object to serialize
+   * @return {String}        The serialized form data
+   */
+  function serialize(data) {
+    let obj = {};
+    for (let [key, value] of data) {
+      if (obj[key] !== undefined) {
+        if (!Array.isArray(obj[key])) {
+          obj[key] = [obj[key]];
+        }
+        obj[key].push(value);
+      } else {
+        obj[key] = value;
+      }
+    }
+    return obj;
+  }
 </script>
 </body>
 </html>
