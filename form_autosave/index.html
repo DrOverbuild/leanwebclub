@@ -69,14 +69,29 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById("address").value = localStorage.getItem("address");
-    document.getElementById("name").value = localStorage.getItem("name");
-    document.getElementById("email").value = localStorage.getItem("email");
-    document.getElementById("more").value = localStorage.getItem("more");
+    const address = document.getElementById("address");
+    const name = document.getElementById("name");
+    const email = document.getElementById("email");
+    const more = document.getElementById("more");
 
-    document.getElementById('save-me').addEventListener('input', function (e) {
+    address.value = localStorage.getItem('address');
+    name.value = localStorage.getItem("name");
+    email.value = localStorage.getItem("email");
+    more.value = localStorage.getItem("more");
+
+    const saveMe = document.getElementById('save-me');
+    saveMe.addEventListener('input', function (e) {
       localStorage.setItem(e.target.name, e.target.value);
-    })
+    });
+
+    saveMe.addEventListener('submit', function (e) {
+      e.preventDefault();
+      address.value = "";
+      name.value = "";
+      email.value = "";
+      more.value = "";
+      localStorage.clear();
+    });
   });
 </script>
 </body>
