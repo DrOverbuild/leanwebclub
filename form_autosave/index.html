@@ -70,13 +70,47 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('save-me');
+    let debounce;
+    let currentNotification;
+
+    /**
+     * Show a "fields saved" status message
+     */
+    function showStatus() {
+
+      // Create a notification
+      let notification = document.createElement('div');
+      notification.setAttribute('aria-live', 'polite');
+
+      // Inject it into the DOM
+      form.append(notification);
+
+      // Add text after it's in the UI
+      setTimeout(function () {
+        notification.textContent = 'Your info has been automatically saved. You can complete and submit the form later.';
+
+        // If there's a current notification, remove it
+        if (currentNotification) {
+          currentNotification.remove();
+        }
+
+        // Store the new notification
+        currentNotification = notification;
+      }, 1);
+
+      // Clear it after 6 seconds
+      setTimeout(function () {
+        notification.remove();
+      }, 6000);
+    }
 
     const json = localStorage.getItem('autosave_data');
     let savedForm;
     if (json) {
       try {
         savedForm = JSON.parse(json);
-      } catch (e) {}
+      } catch (e) {
+      }
     }
 
     if (savedForm) {
@@ -87,8 +121,12 @@
     }
 
     form.addEventListener('input', function () {
-      const serialised = serialize(new FormData(form));
-      localStorage.setItem('autosave_data', JSON.stringify(serialised));
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        const serialised = serialize(new FormData(form));
+        localStorage.setItem('autosave_data', JSON.stringify(serialised));
+        showStatus();
+      }, 1000);
     });
 
     form.addEventListener('submit', function (e) {
